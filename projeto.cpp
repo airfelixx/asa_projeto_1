@@ -20,14 +20,22 @@ int typeId(char c){
 //unordered_map<string, int> affinityMap;
 
 struct aminoacid{
-    int _pot;
+    long long _pot;
     int _type;
 };
 
+void buildseq(int l, int r,vector<vector<int>>& bestK,vector<int>& out){
+    if (r <= l+1)
+        return;
+    int k = bestK[l][r];
+    buildseq(l,k,bestK,out);
+    buildseq(k,r,bestK,out);
+    out.push_back(k);
+}
 
 int main(){
     
-    int Af[5][5]= {
+    long long Af[5][5]= {
     //   P N A B T
         {1,3,1,3,1}, // P
         {5,1,0,1,1}, // N
@@ -56,10 +64,10 @@ int main(){
     int n;
     cin >> n;
 
-    vector<int> pots;
+    vector<long long> pots;
     pots.reserve(n);
     for(int i = 0; i < n; ++i){
-        int p;
+        long long p;
         cin >> p;
         pots.push_back(p);
     }
@@ -71,12 +79,33 @@ int main(){
     protein.push_back({1,typeId('T')});
 
     for(int i=0; i<n; ++i){
-        aminoacid a;
-        a._pot = pots[i];
-        a._type = typeId(types[i]);
-        protein.push_back(a);
+        protein.push_back({pots[i],typeId(types[i])});
     }
     protein.push_back({1,typeId('T')});
 
+    vector<vector<long long>> dp(n+2,vector<long long>(n+2, 0));
+    vector<vector<int>> bestK(n+2,vector<int>(n+2, -1));
+    for(int len=2; len < n+2; len++){
+        for(int l=0; l + len <n+2; l++){
+            int r = l+len;
+            for(int k = l+1; k < r; k++){
+                long long energy = dp[l][k]+dp[k][r] +protein[l]._pot*Af[protein[l]._type][protein[k]._type]*protein[k]._pot+
+                                    protein[k]._pot*Af[protein[k]._type][protein[r]._type]*protein[r]._pot;
+                if(energy>=dp[l][r]){
+                    dp[l][r]=energy;
+                    bestK[l][r]=k;
+                }
+            }
+        }
+    }
+    long long max_energy = dp[0][n+1];
+
+
+    vector<int> answer;
+    buildseq(0,n+1,bestK,answer);
+    cout << max_energy << endl;
+    for(size_t i = 0; i<answer.size();i++){
+        cout<< answer[i] << (i+1 < answer.size()? ' ' : '\n');
+    }
     return 0;
 }
