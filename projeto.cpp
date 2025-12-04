@@ -33,6 +33,9 @@ void buildseq(int l, int r, vector<vector<int>> &bestK, vector<int> &out){
 }
 
 int main(){
+  ios::sync_with_stdio(0);
+  cin.tie(0);
+
   // Matriz de afinidades Af[typeL][typeR]
   unsigned long long Af[5][5] = {
     // P  N  A  B  T
